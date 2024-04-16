@@ -10,7 +10,6 @@ Approach:
   - Formats change according to currency.
 """
 
-
 from datetime import datetime
  
  
