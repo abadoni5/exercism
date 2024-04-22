@@ -1,30 +1,18 @@
-"""
-Approach:
-For scoring a bowling game, the general approach is to implement two main classes: Frame and BowlingGame.
-
-1. Frame Class:
-   - The Frame class manages the state of each frame in the bowling game.
-   - It includes methods to check if the frame is full and if it's invalid based on the number of pins knocked down.
-   - The roll method is responsible for adding pins to the frame while ensuring the frame remains valid and full.
-   - The score method calculates the score for the frame considering the pins knocked down and the next throws.
-
-2. BowlingGame Class:
-   - The BowlingGame class handles the overall game state.
-   - It includes methods for rolling the ball and calculating the final score of the game.
-   - Error handling is implemented to ensure adherence to game rules and scoring protocols.
-   - The is_full method checks if the game is complete by verifying if all frames are full.
-   - The roll method rolls the ball and advances to the next frame if the current frame is full.
-   - The score method calculates the final score of the game by iterating through frames and calculating each frame's score.
-
-By implementing these classes and methods, we can effectively manage the state of the bowling game, handle player rolls, and accurately calculate the final score while adhering to game rules and scoring protocols.
-"""
-
 class Frame(object):
+    """Represents a single frame in a bowling game."""
+
     def __init__(self, tenth=False):
+        """
+        Initialize a Frame.
+
+        Args:
+            tenth (bool): Indicates whether the frame is the tenth frame.
+        """
         self.tenth = tenth
         self.pins = []
 
     def is_full(self):
+        """Check if the frame is full."""
         if self.tenth:
             return len(self.pins) == 2 and sum(self.pins) < 10 or \
                    len(self.pins) == 3 and (sum(self.pins[:2]) == 10 or self.pins[0] == 10)
@@ -32,6 +20,7 @@ class Frame(object):
             return len(self.pins) == 2 or len(self.pins) == 1 and self.pins[0] == 10
 
     def is_invalid(self):
+        """Check if the frame is invalid."""
         if self.tenth:
             return len(self.pins) == 2 and self.pins[0] < 10 and sum(self.pins) > 10 or \
                    len(self.pins) == 3 and self.pins[0] == 10 and self.pins[1] != 10 and sum(self.pins[1:]) > 10
@@ -39,15 +28,37 @@ class Frame(object):
             return sum(self.pins) > 10
 
     def roll(self, pins):
+        """
+        Add pins to the frame.
+
+        Args:
+            pins (int): The number of pins knocked down.
+
+        Returns:
+            bool: True if the frame is full after the roll, False otherwise.
+        
+        Raises:
+            RuntimeError: If trying to add to a full frame.
+            ValueError: If the frame becomes invalid after the roll.
+        """
         if self.is_full():
             raise RuntimeError("Adding to full frame")
         else:
             self.pins.append(pins)
             if self.is_full() and self.is_invalid():
-                raise ValueError ("This frame is not valid: {}".format(self.pins))
+                raise ValueError("This frame is not valid: {}".format(self.pins))
             return self.is_full()
 
     def score(self, next_throws):
+        """
+        Calculate the score for the frame.
+
+        Args:
+            next_throws (list): The pins knocked down in the next throws.
+
+        Returns:
+            int: The score for the frame.
+        """
         if next_throws:
             if self.pins[0] == 10:
                 return sum(self.pins) + sum(next_throws[:2])
@@ -59,17 +70,32 @@ class Frame(object):
             return sum(self.pins)
 
     def __repr__(self):
+        """Return a string representation of the Frame."""
         return "pins={}, full={}, is_invalid={}".format(self.pins, self.is_full(), self.is_invalid())
 
 class BowlingGame(object):
+    """Represents a bowling game."""
+
     def __init__(self):
+        """Initialize a BowlingGame."""
         self.frames = [Frame() for _ in range(9)] + [Frame(tenth=True)]
         self.current = 0
 
     def is_full(self):
+        """Check if the game is full."""
         return all([frame.is_full() for frame in self.frames])
 
     def roll(self, pins):
+        """
+        Roll the ball and add pins to the current frame.
+
+        Args:
+            pins (int): The number of pins knocked down.
+        
+        Raises:
+            ValueError: If the pins value is invalid.
+            IndexError: If trying to roll for a full game.
+        """
         if not 0 <= pins <= 10:
             raise ValueError("Invalid pins value")
         elif self.is_full():
@@ -79,6 +105,15 @@ class BowlingGame(object):
                 self.current += 1
 
     def score(self):
+        """
+        Calculate the final score of the game.
+
+        Returns:
+            int: The final score of the game.
+        
+        Raises:
+            IndexError: If the game is incomplete.
+        """
         if not self.is_full():
             raise IndexError("An incomplete game cannot be scored")
 

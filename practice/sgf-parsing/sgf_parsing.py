@@ -1,21 +1,30 @@
-"""
-Approach:
-- The provided code defines a class `SgfTree` to represent a tree structure with properties and children, and a function `parse` to parse SGF (Smart Game Format) strings into tree structures.
-- The `SgfTree` class has methods for equality comparison, representation, and inequality comparison.
-- The `parse` function takes an SGF string as input and constructs an `SgfTree` object representing the parsed tree structure.
-- The parsing process involves handling property-value pairs, nested tree structures, and handling escape characters.
-- The function iterates through the input string, extracting property-value pairs and recursively parsing nested tree structures.
-- The code utilizes regular expressions to extract property-value pairs and handle escape characters efficiently.
-"""
+''' Approach:
+The provided code defines a class `SgfTree` to represent a tree structure with properties and children, and a function `parse` to parse SGF (Smart Game Format) strings into tree structures.
+The `SgfTree` class has methods for equality comparison, representation, and inequality comparison.
+The `parse` function takes an SGF string as input and constructs an `SgfTree` object representing the parsed tree structure.
+The parsing process involves handling property-value pairs, nested tree structures, and handling escape characters.
+The function iterates through the input string, extracting property-value pairs and recursively parsing nested tree structures.
+The code utilizes regular expressions to extract property-value pairs and handle escape characters efficiently.
+'''
 
 import re
 
 class SgfTree:
+    """Represent a tree structure with properties and children."""
+
     def __init__(self, properties=None, children=None):
+        """
+        Initialize an SgfTree object with properties and children.
+
+        Args:
+            properties (dict, optional): Dictionary of properties. Defaults to None.
+            children (list, optional): List of child SgfTree objects. Defaults to None.
+        """
         self.properties = properties or {}
         self.children = children or []
 
     def __eq__(self, other):
+        """Check if two SgfTree objects are equal."""
         if not isinstance(other, SgfTree):
             return False
         for key, value in self.properties.items():
@@ -34,12 +43,15 @@ class SgfTree:
         return True
 
     def __repr__(self):
+        """Return a string representation of the SgfTree object."""
         return f"SgfTree(properties={self.properties!r}, children={self.children!r})"
 
     def __ne__(self, other):
+        """Check if two SgfTree objects are not equal."""
         return not self == other
 
 def parse(input_string):
+    """Parse an SGF string into an SgfTree object."""
     if input_string == "(;)":
         return SgfTree()
     if not input_string.startswith("("):

@@ -1,80 +1,77 @@
-"""
-Approach:
-- The provided code defines a Tree class for representing trees and performing tree-related operations.
-- The class includes methods for initialization, converting the tree to a dictionary, string representation, comparison, reorienting the tree from a specific node's point of view, and finding a path between two nodes.
-"""
-
 from json import dumps
 
+
 class Tree:
+    """A class representing a tree and its operations."""
+
     def __init__(self, label, children=None):
         """
         Initialize a Tree object with a label and optional children.
-        
+
         Args:
-        label (any): The label of the tree node.
-        children (list, optional): List of child Tree objects. Defaults to None.
+            label (any): The label of the tree node.
+            children (list, optional): List of child Tree objects. Defaults to None.
         """
         self.label = label
         self.children = children if children is not None else []
-        
-    def __dict__(self):
+
+    def to_dict(self):
         """
         Convert the tree to a dictionary representation.
-        
+
         Returns:
-        dict: Dictionary representation of the tree.
+            dict: Dictionary representation of the tree.
         """
-        return {self.label: [c.__dict__() for c in sorted(self.children)]}
-    
+        return {self.label: [c.to_dict() for c in sorted(self.children)]}
+
     def __str__(self, indent=None):
         """
         Convert the tree to a JSON-formatted string.
-        
+
         Args:
-        indent (int, optional): Indentation level. Defaults to None.
-        
+            indent (int, optional): Indentation level. Defaults to None.
+
         Returns:
-        str: JSON-formatted string representing the tree.
+            str: JSON-formatted string representing the tree.
         """
-        return dumps(self.__dict__(), indent=indent)
-    
+        return dumps(self.to_dict(), indent=indent)
+
     def __lt__(self, other):
         """
         Compare two Tree objects based on their labels.
-        
+
         Args:
-        other (Tree): Another Tree object.
-        
+            other (Tree): Another Tree object.
+
         Returns:
-        bool: True if the current object's label is less than the other object's label, False otherwise.
+            bool: True if the current object's label is less than the other object's label, False otherwise.
         """
         return self.label < other.label
-    
+
     def __eq__(self, other):
         """
         Compare two Tree objects for equality.
-        
+
         Args:
-        other (Tree): Another Tree object.
-        
+            other (Tree): Another Tree object.
+
         Returns:
-        bool: True if the two objects are equal, False otherwise.
+            bool: True if the two objects are equal, False otherwise.
         """
-        return self.__dict__() == other.__dict__()
-    
+        return self.to_dict() == other.to_dict()
+
     def from_pov(self, from_node):
         """
         Reorient the tree from the perspective of a specific node.
-        
+
         Args:
-        from_node (any): The label of the node from which the tree should be reoriented.
-        
+            from_node (any): The label of the node from which the tree should be reoriented.
+
         Returns:
-        Tree: The reoriented tree.
-        
+            Tree: The reoriented tree.
+
         Raises:
-        ValueError: If the specified node is not found in the tree.
+            ValueError: If the specified node is not found in the tree.
         """
         cur_path = [[self, 0]]
         while cur_path:
@@ -96,25 +93,25 @@ class Tree:
             c[0].children.append(p[0])
             p = c
         return cur_path[-1][0]
-    
+
     def path_to(self, from_node, to_node):
         """
         Find the path between two nodes in the tree.
-        
+
         Args:
-        from_node (any): The label of the starting node.
-        to_node (any): The label of the target node.
-        
+            from_node (any): The label of the starting node.
+            to_node (any): The label of the target node.
+
         Returns:
-        list: The path from the starting node to the target node.
-        
+            list: The path from the starting node to the target node.
+
         Raises:
-        ValueError: If the starting node is not found in the tree or if no path is found between the two nodes.
+            ValueError: If the starting node is not found in the tree or if no path is found between the two nodes.
         """
         to_find = {from_node, to_node}
         found_paths = dict()
         cur_path = []
-        
+
         def helper(subtree):
             nonlocal to_find, found_paths, cur_path
             cur_path.append(subtree.label)
@@ -126,18 +123,18 @@ class Tree:
                     break
                 helper(c)
             cur_path.pop()
-        
+
         helper(self)
         if from_node in to_find:
             raise ValueError("Tree could not be reoriented")
         if to_node in to_find:
             raise ValueError("No path found")
-        
+
         from_path = found_paths[from_node]
         to_path = found_paths[to_node]
         from_part = []
         to_part = []
-        
+
         while len(from_path) > len(to_path):
             from_part.append(from_path.pop())
         while len(to_path) > len(from_path):

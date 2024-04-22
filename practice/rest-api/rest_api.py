@@ -1,74 +1,91 @@
-"""
-The RestAPI class provides a simple RESTful API interface for managing user data. Here's an overview of the approach:
-1. Class Structure:
-    - The class maintains a `user_database` dictionary to store user data.
-    - Separate dictionaries `get_handlers` and `post_handlers` are used to map URLs to corresponding handler methods.
-2. Initialization:
-    - In the `__init__` method, the user-provided database (if any) is assigned to `user_database`.
-    - Default handlers for GET and POST requests are set for the `/users`, `/add`, and `/iou` endpoints.
-3. GET and POST Handling:
-    - The `get` and `post` methods handle HTTP GET and POST requests respectively by delegating to the `execute_handler` method.
-    - The `execute_handler` method retrieves the appropriate handler function for the given URL from the corresponding dictionary.
-4. Handler Execution:
-    - The handler functions defined for various endpoints process the requests and return the appropriate responses.
-    - Handlers are responsible for validating input, performing operations on the user database, and generating responses.
-5. User Management:
-    - The `get_users`, `get_named_users`, and `add_user` methods handle user-related requests.
-    - `get_users` returns a JSON string of all users or filtered users based on provided names.
-    - `add_user` adds a new user to the database if it doesn't already exist.
-    - `get_named_users` filters users based on provided names.
-6. IOU Management:
-    - The `add_iou` method handles IOU-related requests.
-    - It parses the payload to extract lender, borrower, and amount information.
-    - It adjusts balances for both lender and borrower accordingly and updates the user database.
-    - The method ensures that both lender and borrower exist in the database before proceeding.
-7. Balances Adjustment:
-    - The `adjust_balances` method updates balances for a user after an IOU is added.
-    - It determines the appropriate balance types (`owes` or `owed_by`) based on whether the user is the lender or borrower.
-    - It adjusts balances and handles cases where previous balances need to be cancelled or reduced.
-8. Error Handling:
-    - Various exceptions are raised to handle error conditions such as missing keys in payload, user not found, etc.
-    - Exceptions provide informative error messages to aid in debugging and troubleshooting.
-9. Utility Methods:
-    - Utility methods like `create_user`, `increase_named_balance`, and `find_user` are used to perform common tasks in a modular manner.
-    
-"""
 import json
 
-class RestAPI():
+class RestAPI:
     user_database = dict()
     get_handlers = dict()
     post_handlers = dict()
 
     def __init__(self, database=None):
-        pass
-        self.user_database = database
+        """
+        Initialize the RestAPI with an optional database.
+
+        Args:
+            database (dict, optional): The initial user database. Defaults to None.
+        """
+        self.user_database = database or {'users': []}
         self.get_handlers['/users'] = self.get_users
         self.post_handlers['/add'] = self.add_user
         self.post_handlers['/iou'] = self.add_iou
 
     def get(self, url, payload=None):
-        pass
+        """
+        Handle GET requests.
+
+        Args:
+            url (str): The URL for the GET request.
+            payload (str, optional): The payload for the GET request. Defaults to None.
+
+        Returns:
+            str: The response to the GET request.
+        """
         return self.execute_handler(self.get_handlers, url, payload)
 
     def post(self, url, payload=None):
-        pass
+        """
+        Handle POST requests.
+
+        Args:
+            url (str): The URL for the POST request.
+            payload (str, optional): The payload for the POST request. Defaults to None.
+
+        Returns:
+            str: The response to the POST request.
+        """
         return self.execute_handler(self.post_handlers, url, payload)
 
     @staticmethod
     def execute_handler(handlers, url, payload):
+        """
+        Execute the handler for the given URL.
+
+        Args:
+            handlers (dict): Dictionary of handlers.
+            url (str): The URL for the request.
+            payload (str): The payload for the request.
+
+        Returns:
+            str: The response to the request.
+        """
         handler = handlers.get(url)
         if not handler:
             raise ValueError(f"No route defined for {url}.")
         return handler(payload)
 
     def get_users(self, payload):
+        """
+        Handle GET request for users.
+
+        Args:
+            payload (str): The payload for the request.
+
+        Returns:
+            str: The response to the request.
+        """
         if payload:
             return self.get_named_users(payload)
         else:
             return json.dumps(self.user_database)
 
     def get_named_users(self, payload):
+        """
+        Handle GET request for named users.
+
+        Args:
+            payload (str): The payload for the request.
+
+        Returns:
+            str: The response to the request.
+        """
         try:
             names = json.loads(payload)['users']
             names.sort()
@@ -81,6 +98,15 @@ class RestAPI():
         return json.dumps({"users": users})
 
     def add_user(self, payload):
+        """
+        Handle POST request to add a user.
+
+        Args:
+            payload (str): The payload for the request.
+
+        Returns:
+            str: The response to the request.
+        """
         try:
             name = json.loads(payload)['user']
         except KeyError:
@@ -97,9 +123,27 @@ class RestAPI():
 
     @staticmethod
     def create_user(name):
+        """
+        Create a user with the given name.
+
+        Args:
+            name (str): The name of the user.
+
+        Returns:
+            dict: The user dictionary.
+        """
         return {"name": name, "owes": {}, "owed_by": {}, "balance": 0.0}
 
     def add_iou(self, payload):
+        """
+        Handle POST request to add an IOU.
+
+        Args:
+            payload (str): The payload for the request.
+
+        Returns:
+            str: The response to the request.
+        """
         try:
             iou = json.loads(payload)
             lender = self.find_user(iou['lender'])
@@ -125,6 +169,15 @@ class RestAPI():
         return json.dumps({"users": users})
 
     def adjust_balances(self, user, user_is_lender, name, amount):
+        """
+        Adjust balances for a user.
+
+        Args:
+            user (dict): The user dictionary.
+            user_is_lender (bool): Indicates if the user is the lender.
+            name (str): The name of the other party involved.
+            amount (float): The amount of the IOU.
+        """
         reduce_balance = 'owes' if user_is_lender else 'owed_by'
         increase_balance = 'owed_by' if user_is_lender else 'owes'
 
@@ -142,6 +195,14 @@ class RestAPI():
 
     @staticmethod
     def increase_named_balance(balances, name, amount):
+        """
+        Increase the named balance.
+
+        Args:
+            balances (dict): The balance dictionary.
+            name (str): The name of the other party involved.
+            amount (float): The amount of the IOU.
+        """
         if name in balances:
             new_balance = balances[name] + amount
             if new_balance:
@@ -152,6 +213,15 @@ class RestAPI():
             balances[name] = amount
 
     def find_user(self, name):
+        """
+        Find a user by name.
+
+        Args:
+            name (str): The name of the user.
+
+        Returns:
+            dict: The user dictionary if found, None otherwise.
+        """
         for user in self.user_database['users']:
             if user['name'] == name:
                 return user

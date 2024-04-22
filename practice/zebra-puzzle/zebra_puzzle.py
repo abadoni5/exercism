@@ -1,11 +1,16 @@
-"""
-Iterate through all possible permutations of attributes for each house, 
-applying the given constraints and return the solution when found.
-"""
-
 from itertools import permutations
 
 def solve():
+    """
+    Iterate through all possible permutations of attributes for each house, 
+    applying the given constraints and return the solution when found.
+
+    Returns:
+        list: A list containing dictionaries with solutions for each attribute.
+            Each dictionary represents a house with its attributes.
+            Example: [{'person': 'Norwegian', 'color': 'yellow', 'drink': 'water', 'animal': 'fox', 'smoke': 'Chesterfields'}, ...]
+
+    """
     people = ("Norwegian", "Englishman", "Spaniard", "Ukrainian", "Japanese")
     colors = ("green", "blue", "red", "yellow", "ivory")
     animals = ("dog", "snails", "horse", "fox", "zebra")
@@ -17,6 +22,7 @@ def solve():
     drinkmix = [x for x in permutations(drinks) if x[2] == "milk" and x[3] == "coffee" and "tea" not in (x[0], x[2]) and x[0] != "orange juice"]
     animalmix = [x for x in permutations(animals) if x[0] != "dog" and x[1] == "horse"]
     smokemix = [x for x in permutations(smokes) if x[0] == "Kools" and "Lucky Strike" not in (x[2], x[3]) and x[1] != "Old Gold"]
+    
     for p in peoplemix:
         for c in colormix:
             for d in drinkmix:
@@ -28,24 +34,39 @@ def solve():
 solution = solve()
 
 def drinks_water():
+    """
+    Returns the person who drinks water.
+
+    Returns:
+        str: The name of the person who drinks water.
+
+    """
     for t in solution:
         if t['drink'] == 'water':
             return t['person']
 
 def owns_zebra():
+    """
+    Returns the person who owns the zebra.
+
+    Returns:
+        str: The name of the person who owns the zebra.
+
+    """
     for t in solution:
         if t['animal'] == 'zebra':
             return t['person']
-        
-
-# //////////////////// binary search tree:
-
-"""
-add() inserts new data item into binary search tree while maintaining the sorted order. 
-sorted_data() performs in-order traversal of  tree to retrieve all data items in sorted order.
-"""
 
 class TreeNode:
+    """
+    Represents a node in a binary search tree.
+
+    Attributes:
+        data: The data stored in the node.
+        left: The left child of the node.
+        right: The right child of the node.
+    """
+
     def __init__(self, data, left=None, right=None):
         self.data = data
         self.left = left
@@ -56,12 +77,31 @@ class TreeNode:
 
 
 class BinarySearchTree:
+    """
+    Represents a binary search tree.
+
+    Attributes:
+        root: The root node of the binary search tree.
+    """
+
     def __init__(self, tree_data):
+        """
+        Initialize the binary search tree with data.
+
+        Args:
+            tree_data (list): A list of data items to initialize the tree.
+        """
         self.root = None
         for data in tree_data:
             self.add(data)
 
     def add(self, data):
+        """
+        Inserts new data item into the binary search tree while maintaining the sorted order.
+
+        Args:
+            data: The data item to be inserted.
+        """
         if self.root is None:
             self.root = TreeNode(data)
             return
@@ -70,7 +110,7 @@ class BinarySearchTree:
 
         while not inserted:
             if data <= cur_node.data:
-                if cur_node.left: 
+                if cur_node.left:
                     cur_node = cur_node.left
                 else:
                     cur_node.left = TreeNode(data)
@@ -89,9 +129,21 @@ class BinarySearchTree:
             self._inorder_traverse(node.right, elements)
 
     def data(self):
+        """
+        Returns the root node of the binary search tree.
+
+        Returns:
+            TreeNode: The root node of the binary search tree.
+        """
         return self.root
 
     def sorted_data(self):
+        """
+        Performs in-order traversal of the tree to retrieve all data items in sorted order.
+
+        Returns:
+            list: A list of data items in sorted order.
+        """
         elements = []
         self._inorder_traverse(self.root, elements)
         return elements

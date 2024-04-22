@@ -1,31 +1,34 @@
-"""
-Approach:
-Basic evaluator for a subset of Forth, a stack-based programming language. 
-Supports arithmetic operations (+, -, *, /), stack manipulation commands (DUP, DROP, SWAP, OVER), and defining new words. 
-Custom exceptions are raised with meaningful error messages as required.
-"""
-
 import operator
 
 class StackUnderflowError(Exception):
+    """Exception raised when attempting to pop from an empty stack."""
     def __init__(self, message):
         self.message = message
 
 def evaluate(input_data):
+    """
+    Evaluate Forth-like expressions.
+
+    Args:
+        input_data (list): List of Forth-like expressions.
+
+    Returns:
+        list: Resulting stack after evaluating the input data.
+    """
     data = [i.lower() for i in input_data]
     stack = []
     operators = {"+": operator.add, "-": operator.sub,
-                "*": operator.mul, "/": operator.floordiv}
-    manipulations = {"dup": operator.getitem , "drop": operator.delitem,
-                    "over": operator.getitem}
+                 "*": operator.mul, "/": operator.floordiv}
+    manipulations = {"dup": operator.getitem, "drop": operator.delitem,
+                     "over": operator.getitem}
     index = {"dup": -1, "drop": -1, "over": -2}
     user_defined = {}
 
+    # Define user-defined operations
     for i in data:
         if i[0] == ":" and i[-1] == ";":
             definition = i[1:-1].split()
-            if definition[0].isnumeric() or (definition[0][0] == "-"
-                                            and definition[0][1:].isnumeric()):
+            if definition[0].isnumeric() or (definition[0][0] == "-" and definition[0][1:].isnumeric()):
                 raise ValueError("illegal operation")
             else:
                 instructions = []
@@ -36,6 +39,7 @@ def evaluate(input_data):
                         instructions.append(op)
                 user_defined[definition[0]] = instructions
 
+    # Evaluate input expressions
     for i in data[-1].split():
         try:
             stack.append(int(i))
